@@ -3,8 +3,9 @@ from pygame.draw import *
 from random import randint
 pygame.init()
 
-FPS = 1
-screen = pygame.display.set_mode((1200, 900))
+FPS = 20
+w, l = (1200, 900)
+screen = pygame.display.set_mode((w, l))
 
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
@@ -14,38 +15,69 @@ MAGENTA = (255, 0, 255)
 CYAN = (0, 255, 255)
 BLACK = (0, 0, 0)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
+maxRadius = 42
+score=0
 
-class draw_ball:
+class Square(Ball):
+
+    def draw(self):
+        rect()
+
+
+
+
+class Ball:
 
     def __init__(self):
-        self.x = randint(100,700)
-        self.y = randint(100,500)
-        self.r = randint(30,50)
+        self.x = randint(42, 1200)
+        self.y = randint(42, 900)
+        self.vx = randint(-10, 10)
+        self.vy = randint(-10, 10)
+        self.r = randint(10, 42)
         self.color = COLORS[randint(0, 5)]
+
+
+    def move(self):
+        if(self.x + self.r) > 1200 or (self.x - self.r) < 0:
+            self.vx = -self.vx
+
+        if(self.y + self.r) > 900 or (self.y - self.r) < 0:
+            self.vy = -self.vy
+
+        self.x += self.vx
+        self.y += self.vy
+
+    def draw(self):
         circle(screen, self.color, (self.x, self.y), self.r)
 
-    def circle_draw(self):
-        circle(screen, self.color, (self.x, self.y), self.r)
+    def check_event(self, pos):
+        x, y = pos
+        if (self.x - x) ** 2 + (self.y - y) ** 2 <= (self.r) ** 2:
+           return True
 
+
+balls = [Ball() for i in range(17)]
 
 pygame.display.update()
 clock = pygame.time.Clock()
 finished = False
-score = 0
 
 while not finished:
-    b = draw_ball()
-    b.circle_draw()
+    for objct in balls:
+        objct.move()
+        objct.draw()
+
     pygame.display.update()
     clock.tick(FPS)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            x, y = event.pos
-            if (b.x - x)**2+(b.y-y)**2 <= (b.r)**2:
-                score += 1
-                print(score)
+            for objct in balls:
+                if (objct.check_event(event.pos)) == True:
+                    score+=1
+                    print(score)
 
     screen.fill(BLACK)
 
